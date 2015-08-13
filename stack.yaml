@@ -1,0 +1,7 @@
+flags: {}
+packages:
+- '.'
+extra-deps:
+- lens-family-1.2.0
+- lens-simple-0.1.0.7
+resolver: lts-2.18

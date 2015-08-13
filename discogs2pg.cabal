@@ -1,0 +1,26 @@
+name:                discogs2pg
+version:             0.1.0.0
+synopsis:            Parse Discogs XML dumps into postgresql
+description:         Please see README.md
+homepage:            http://github.com/alvare/discogs2pg
+license:             BSD3
+license-file:        LICENSE
+author:              Ezequiel A. Alvarez
+maintainer:          welcometothechango@gmail.com
+copyright:           Ezequiel A. Alvarez
+category:            XML
+build-type:          Simple
+cabal-version:       >=1.10
+
+executable discogs2pg
+  hs-source-dirs:      src
+  main-is:             Main.hs
+  ghc-options:         -threaded -rtsopts -with-rtsopts=-N -Wall
+  build-depends:       base
+                     , bytestring
+                     , hexpat
+                     , mtl
+                     , lens-simple
+                     , postgresql-simple
+                     , cassava
+  default-language:    Haskell2010
