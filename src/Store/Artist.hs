@@ -25,7 +25,7 @@ store cons ars = do
                     FROM STDIN |]
     mapM_ (process conn) ars
     i <- putCopyEnd conn
-    putStr "Parsed " >> putStr i >> putStrLn " artists."
+    putStr "Artists parsed: " >> print i
 
 process :: Connection -> Artist -> IO ()
 process conn a = do
@@ -48,13 +48,20 @@ serialize (Artist i n r d p us as gs ms ns) = (BC.intercalate "\t"
      quotes us, quotes as, quotes gs, quotes ms, quotes ns]) `BC.snoc` '\n'
   where
     quote "" = "\\N"
-    quote s = BC.concatMap match $ BC.filter (/='\\') s
+    quote s = BC.concatMap match s
 
-    quotes [] = "\\N"
-    quotes l = "{" <> (BC.intercalate "," $ map (wrap . quote) l) <> "}"
-
+    match '\\' = ""
     match '\n' = "\\n"
     match '\t' = "\\t"
     match x = BC.singleton x
 
-    wrap s = "\"" <> BC.concatMap (\x -> if x == '\"' then "\\\\\"" else BC.singleton x) s <> "\""
+    quotes [] = "\\N"
+    quotes l = "{" <> (BC.intercalate "," $ map quoteA l) <> "}"
+
+    quoteA s = "\"" <> BC.concatMap matchA s <> "\""
+
+    matchA '\"' = "\\\\\""
+    matchA '\\' = ""
+    matchA '\n' = "\\n"
+    matchA '\t' = "\\t"
+    matchA x = BC.singleton x
