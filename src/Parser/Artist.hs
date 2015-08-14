@@ -7,9 +7,10 @@ module Parser.Artist
   , Artist(..)
   ) where
 
+import Data.Maybe (mapMaybe)
+import Data.List (foldl')
 import Lens.Simple
-import Control.Monad.State
-import Text.XML.Expat.SAX (SAXEvent(..))
+import Text.XML.Expat.Tree (NodeG(..), XMLParseError, UNode)
 import qualified Data.ByteString as SB
 import Data.ByteString (ByteString)
 
@@ -27,90 +28,47 @@ data Artist = Artist
   , _artistNameVars :: [ByteString] }
   deriving Show
 
-data ArtistState = ArtistState
-  { _nested :: ArtistNested
-  , _artist :: Artist
-  , _buffer :: ByteString
-  , _events :: [SAXEvent ByteString ByteString] }
-
-data ArtistNested = None | Members | NameVars | Aliases | Groups
-
 $(makeLenses ''Artist)
-$(makeLenses ''ArtistState)
 
 
-parse :: [SAXEvent ByteString ByteString] -> [Artist]
-parse evs = evalState parseArtist initS
-  where
-    initS = ArtistState None emptyArtist SB.empty evs
+parse :: (UNode ByteString, Maybe XMLParseError) -> [Artist]
+parse = parseArtists . fst
 
 emptyArtist :: Artist
-emptyArtist = Artist SB.empty SB.empty SB.empty SB.empty SB.empty [] [] [] [] []
+emptyArtist = Artist "" "" "" "" "" [] [] [] [] []
 
-parseArtist :: State ArtistState [Artist]
-parseArtist = do
-    (ev:evs) <- use events
-    events .= evs
+parseArtists :: UNode ByteString -> [Artist]
+parseArtists (Element "artists" [] childs) = mapMaybe parseArtist childs
+parseArtists _ = error "Couldn't find 'artists' tag."
 
-    buffer' <- use buffer
+parseArtist :: UNode ByteString -> Maybe Artist
+parseArtist (Element "artist" [] childs) = Just $ foldl' parseArtist' emptyArtist childs
+parseArtist (Text _) = Nothing
+parseArtist _ = error "Couldn't find 'artist' tag."
 
-    case ev of
-        CharacterData txt -> do
-            buffer <>= txt
-            parseArtist
+parseArtist' :: Artist -> UNode ByteString -> Artist
+parseArtist' a (Element "id" [] txt) = a & artistId .~ getText txt
+parseArtist' a (Element "name" [] txt) = a & artistName .~ getText txt
+parseArtist' a (Element "realname" [] txt) = a & artistRealName .~ getText txt
+parseArtist' a (Element "profile" [] txt) = a & artistProfile .~ getText txt
+parseArtist' a (Element "data_quality" [] txt) = a & artistQuality .~ getText txt
+parseArtist' a (Element "namevariations" [] ns) = a & artistNameVars .~ getNodes "name" ns
+parseArtist' a (Element "aliases" [] ns) = a & artistAliases .~ getNodes "name" ns
+parseArtist' a (Element "members" [] ns) = a & artistMembers .~ getNodes "name" ns
+parseArtist' a (Element "groups" [] ns) = a & artistGroups .~ getNodes "name" ns
+parseArtist' a (Element "urls" [] ns) = a & artistUrls .~ getNodes "url" ns
+parseArtist' a _ = a
 
-        StartElement el _ -> do
-            case el of
-                "members" -> nested .= Members
-                "aliases" -> nested .= Aliases
-                "groups" -> nested .= Groups
-                "namevariations" -> nested .= NameVars
-                "artist" -> artist .= emptyArtist
-                _ -> return ()
-            parseArtist
+getNodes :: ByteString -> [UNode ByteString] -> [ByteString]
+getNodes tag = mapMaybe pickName
+  where
+      pickName (Element tag' [] txt) = if tag' == tag
+                                           then Just $ getText txt
+                                           else Nothing
+      pickName _ = Nothing
 
-        EndElement "artists" -> return []
-
-        EndElement "artist" -> do
-            a <- use artist
-            etc <- parseArtist
-            return $ a : etc
-
-        EndElement el -> do
-            case el of
-                "id" -> use nested >>= \case
-                    Members -> return ()
-                    _ -> artist . artistId .= buffer'
-
-                "name" -> use nested >>= \case
-                    Members -> do
-                        m <- use $ artist . artistMembers
-                        artist . artistMembers .= buffer' : m
-                    Aliases -> do
-                        m <- use $ artist . artistAliases
-                        artist . artistAliases .= buffer' : m
-                    Groups -> do
-                        m <- use $ artist . artistGroups
-                        artist . artistGroups .= buffer' : m
-                    NameVars -> do
-                        m <- use $ artist . artistNameVars
-                        artist . artistNameVars .= buffer' : m
-                    None -> artist . artistName .= buffer'
-
-                "url" -> do
-                        m <- use $ artist . artistUrls
-                        artist . artistUrls .= buffer' : m
-                "realname" -> artist . artistRealName .= buffer'
-                "profile" -> artist . artistProfile .= buffer'
-                "data_quality" -> artist . artistQuality .= buffer'
-
-                "members" -> nested .= None
-                "aliases" -> nested .= None
-                "groups" -> nested .= None
-                "namevariations" -> nested .= None
-                _ -> return ()
-
-            buffer .= SB.empty
-            parseArtist
-
-        _ -> parseArtist
+getText :: [UNode ByteString] -> ByteString
+getText = SB.concat . mapMaybe pickText
+  where
+    pickText (Text s) = Just s
+    pickText _ = error "Nested node in your text."
