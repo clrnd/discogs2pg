@@ -6,14 +6,13 @@ module Discogs.Artist
   ( Artist(..)
   ) where
 
-import           Data.Maybe (mapMaybe)
-import           Lens.Simple
-import           Text.XML.Expat.Tree (NodeG(..), UNode)
-import           Database.PostgreSQL.Simple.SqlQQ
-import           Data.ByteString (ByteString)
+import Lens.Simple
+import Text.XML.Expat.Tree (NodeG(..), UNode, isElement)
+import Database.PostgreSQL.Simple.SqlQQ
+import Data.ByteString (ByteString)
 
-import           Discogs.Build
-import           Discogs.Store
+import Discogs.Build
+import Discogs.Store
 
 
 data Artist = Artist
@@ -40,10 +39,10 @@ instance Storable Artist where
          escapeList us, escapeList as, escapeList gs, escapeList ms, escapeList ns]
 
     getQuery _ = [sql|COPY artist (id, name, realname,
-                                 data_quality, profile,
-                                 urls, aliases, groups,
-                                 members, namevariations)
-                    FROM STDIN |]
+                                   data_quality, profile,
+                                   urls, aliases, groups,
+                                   members, namevariations)
+                      FROM STDIN |]
 
 instance Buildable Artist where
     build = parseArtists . fst
@@ -52,12 +51,11 @@ emptyArtist :: Artist
 emptyArtist = Artist "" "" "" "" "" [] [] [] [] []
 
 parseArtists :: UNode ByteString -> [Artist]
-parseArtists (Element "artists" [] childs) = mapMaybe parseArtist childs
+parseArtists (Element "artists" [] childs) = map parseArtist $ filter isElement childs
 parseArtists _ = error "Couldn't find 'artists' tag."
 
-parseArtist :: UNode ByteString -> Maybe Artist
-parseArtist (Element "artist" [] childs) = Just $ foldr parseArtist' emptyArtist childs
-parseArtist (Text _) = Nothing
+parseArtist :: UNode ByteString -> Artist
+parseArtist (Element "artist" [] childs) = foldr parseArtist' emptyArtist childs
 parseArtist _ = error "Couldn't find 'artist' tag."
 
 parseArtist' :: UNode ByteString -> Artist -> Artist
