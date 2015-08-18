@@ -1,18 +1,22 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE QuasiQuotes #-}
 {-# LANGUAGE TemplateHaskell #-}
-{-# LANGUAGE LambdaCase #-}
 {-# OPTIONS_GHC -fno-warn-missing-signatures #-}
-module Parser.Artist
-  ( parse
-  , Artist(..)
+module Web.Discogs.Artist
+  ( Artist(..)
   ) where
 
-import Data.Maybe (mapMaybe)
-import Data.List (foldl')
-import Lens.Simple
-import Text.XML.Expat.Tree (NodeG(..), XMLParseError, UNode)
-import qualified Data.ByteString as SB
-import Data.ByteString (ByteString)
+import           Data.Monoid
+import           Data.Maybe (mapMaybe)
+import           Data.List (foldl')
+import           Lens.Simple
+import           Text.XML.Expat.Tree (NodeG(..), UNode)
+import           Database.PostgreSQL.Simple.SqlQQ
+import qualified Data.ByteString.Char8 as B
+import           Data.ByteString (ByteString)
+
+import           Web.Discogs.Build
+import           Web.Discogs.Store
 
 
 data Artist = Artist
@@ -30,9 +34,41 @@ data Artist = Artist
 
 $(makeLenses ''Artist)
 
+instance Storable Artist where
+    avoid (Artist _ "" _ _ _ _ _ _ _ _) = Just "empty 'name'"
+    avoid _ = Nothing
 
-parse :: (UNode ByteString, Maybe XMLParseError) -> [Artist]
-parse = parseArtists . fst
+    toRow (Artist i n r d p us as gs ms ns) = (B.intercalate "\t"
+        [quote i, quote n, quote r, quote d, quote p,
+         quotes us, quotes as, quotes gs, quotes ms, quotes ns]) `B.snoc` '\n'
+      where
+        quote "" = "\\N"
+        quote s = B.concatMap match s
+
+        match '\\' = ""
+        match '\n' = "\\n"
+        match '\t' = "\\t"
+        match x = B.singleton x
+
+        quotes [] = "\\N"
+        quotes l = "{" <> (B.intercalate "," $ map quoteA l) <> "}"
+
+        quoteA s = "\"" <> B.concatMap matchA s <> "\""
+
+        matchA '\"' = "\\\\\""
+        matchA '\\' = ""
+        matchA '\n' = "\\n"
+        matchA '\t' = "\\t"
+        matchA x = B.singleton x
+
+    getQuery _ = [sql|COPY artist (id, name, realname,
+                                 data_quality, profile,
+                                 urls, aliases, groups,
+                                 members, namevariations)
+                    FROM STDIN |]
+
+instance Buildable Artist where
+    build = parseArtists . fst
 
 emptyArtist :: Artist
 emptyArtist = Artist "" "" "" "" "" [] [] [] [] []
@@ -68,7 +104,7 @@ getNodes tag = mapMaybe pickName
       pickName _ = Nothing
 
 getText :: [UNode ByteString] -> ByteString
-getText = SB.concat . mapMaybe pickText
+getText = B.concat . mapMaybe pickText
   where
     pickText (Text s) = Just s
     pickText _ = error "Nested node in your text."
