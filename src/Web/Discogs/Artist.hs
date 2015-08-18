@@ -6,7 +6,6 @@ module Web.Discogs.Artist
   ( Artist(..)
   ) where
 
-import           Data.Monoid
 import           Data.Maybe (mapMaybe)
 import           Data.List (foldl')
 import           Lens.Simple
@@ -38,28 +37,9 @@ instance Storable Artist where
     avoid (Artist _ "" _ _ _ _ _ _ _ _) = Just "empty 'name'"
     avoid _ = Nothing
 
-    toRow (Artist i n r d p us as gs ms ns) = (B.intercalate "\t"
-        [quote i, quote n, quote r, quote d, quote p,
-         quotes us, quotes as, quotes gs, quotes ms, quotes ns]) `B.snoc` '\n'
-      where
-        quote "" = "\\N"
-        quote s = B.concatMap match s
-
-        match '\\' = ""
-        match '\n' = "\\n"
-        match '\t' = "\\t"
-        match x = B.singleton x
-
-        quotes [] = "\\N"
-        quotes l = "{" <> (B.intercalate "," $ map quoteA l) <> "}"
-
-        quoteA s = "\"" <> B.concatMap matchA s <> "\""
-
-        matchA '\"' = "\\\\\""
-        matchA '\\' = ""
-        matchA '\n' = "\\n"
-        matchA '\t' = "\\t"
-        matchA x = B.singleton x
+    toRow (Artist i n r d p us as gs ms ns) = escapeRow $
+        [escape i, escape n, escape r, escape d, escape p,
+         escapeList us, escapeList as, escapeList gs, escapeList ms, escapeList ns]
 
     getQuery _ = [sql|COPY artist (id, name, realname,
                                  data_quality, profile,
