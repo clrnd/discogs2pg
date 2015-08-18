@@ -4,9 +4,9 @@ import           System.Environment
 import           Text.XML.Expat.Tree
 import qualified Data.ByteString.Lazy as LB
 
-import           Web.Discogs.Build
-import           Web.Discogs.Store
-import           Web.Discogs.Artist
+import           Discogs.Build
+import           Discogs.Store
+import           Discogs.Types
 
 
 main :: IO ()

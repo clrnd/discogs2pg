@@ -2,20 +2,18 @@
 {-# LANGUAGE QuasiQuotes #-}
 {-# LANGUAGE TemplateHaskell #-}
 {-# OPTIONS_GHC -fno-warn-missing-signatures #-}
-module Web.Discogs.Artist
+module Discogs.Artist
   ( Artist(..)
   ) where
 
 import           Data.Maybe (mapMaybe)
-import           Data.List (foldl')
 import           Lens.Simple
 import           Text.XML.Expat.Tree (NodeG(..), UNode)
 import           Database.PostgreSQL.Simple.SqlQQ
-import qualified Data.ByteString.Char8 as B
 import           Data.ByteString (ByteString)
 
-import           Web.Discogs.Build
-import           Web.Discogs.Store
+import           Discogs.Build
+import           Discogs.Store
 
 
 data Artist = Artist
@@ -58,33 +56,19 @@ parseArtists (Element "artists" [] childs) = mapMaybe parseArtist childs
 parseArtists _ = error "Couldn't find 'artists' tag."
 
 parseArtist :: UNode ByteString -> Maybe Artist
-parseArtist (Element "artist" [] childs) = Just $ foldl' parseArtist' emptyArtist childs
+parseArtist (Element "artist" [] childs) = Just $ foldr parseArtist' emptyArtist childs
 parseArtist (Text _) = Nothing
 parseArtist _ = error "Couldn't find 'artist' tag."
 
-parseArtist' :: Artist -> UNode ByteString -> Artist
-parseArtist' a (Element "id" [] txt) = a & artistId .~ getText txt
-parseArtist' a (Element "name" [] txt) = a & artistName .~ getText txt
-parseArtist' a (Element "realname" [] txt) = a & artistRealName .~ getText txt
-parseArtist' a (Element "profile" [] txt) = a & artistProfile .~ getText txt
-parseArtist' a (Element "data_quality" [] txt) = a & artistQuality .~ getText txt
-parseArtist' a (Element "namevariations" [] ns) = a & artistNameVars .~ getNodes "name" ns
-parseArtist' a (Element "aliases" [] ns) = a & artistAliases .~ getNodes "name" ns
-parseArtist' a (Element "members" [] ns) = a & artistMembers .~ getNodes "name" ns
-parseArtist' a (Element "groups" [] ns) = a & artistGroups .~ getNodes "name" ns
-parseArtist' a (Element "urls" [] ns) = a & artistUrls .~ getNodes "url" ns
-parseArtist' a _ = a
-
-getNodes :: ByteString -> [UNode ByteString] -> [ByteString]
-getNodes tag = mapMaybe pickName
-  where
-      pickName (Element tag' [] txt) = if tag' == tag
-                                           then Just $ getText txt
-                                           else Nothing
-      pickName _ = Nothing
-
-getText :: [UNode ByteString] -> ByteString
-getText = B.concat . mapMaybe pickText
-  where
-    pickText (Text s) = Just s
-    pickText _ = error "Nested node in your text."
+parseArtist' :: UNode ByteString -> Artist -> Artist
+parseArtist' (Element "id" [] txt) = artistId .~ getTexts txt
+parseArtist' (Element "name" [] txt) = artistName .~ getTexts txt
+parseArtist' (Element "realname" [] txt) = artistRealName .~ getTexts txt
+parseArtist' (Element "profile" [] txt) = artistProfile .~ getTexts txt
+parseArtist' (Element "data_quality" [] txt) = artistQuality .~ getTexts txt
+parseArtist' (Element "namevariations" [] ns) = artistNameVars .~ getNodes "name" ns
+parseArtist' (Element "aliases" [] ns) = artistAliases .~ getNodes "name" ns
+parseArtist' (Element "members" [] ns) = artistMembers .~ getNodes "name" ns
+parseArtist' (Element "groups" [] ns) = artistGroups .~ getNodes "name" ns
+parseArtist' (Element "urls" [] ns) = artistUrls .~ getNodes "url" ns
+parseArtist' _ = id

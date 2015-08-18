@@ -1,5 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
-module Web.Discogs.Store where
+module Discogs.Store where
 
 import           Data.Monoid
 import           Control.Monad
