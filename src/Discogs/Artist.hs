@@ -1,14 +1,13 @@
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE QuasiQuotes #-}
 {-# LANGUAGE TemplateHaskell #-}
 {-# OPTIONS_GHC -fno-warn-missing-signatures #-}
 module Discogs.Artist
-  ( Artist(..)
+  ( Artist
   ) where
 
 import Lens.Simple
+import Data.List (foldl')
 import Text.XML.Expat.Tree (NodeG(..), UNode, isElement)
-import Database.PostgreSQL.Simple.SqlQQ
 import Data.ByteString (ByteString)
 
 import Discogs.Build
@@ -31,18 +30,23 @@ data Artist = Artist
 $(makeLenses ''Artist)
 
 instance Storable Artist where
+    getName _ = "artists"
+
     avoid (Artist _ "" _ _ _ _ _ _ _ _) = Just "empty 'name'"
     avoid _ = Nothing
 
-    toRow (Artist i n r d p us as gs ms ns) = escapeRow $
-        [escape i, escape n, escape r, escape d, escape p,
-         escapeList us, escapeList as, escapeList gs, escapeList ms, escapeList ns]
+    toRows (Artist i n r d p us as gs ms ns) = [
+        escapeRow [escape i, escape n, escape r, escape d, escape p,
+                   escapeList us, escapeList as, escapeList gs,
+                   escapeList ms, escapeList ns]
+        ]
 
-    getQuery _ = [sql|COPY artist (id, name, realname,
-                                   data_quality, profile,
-                                   urls, aliases, groups,
-                                   members, namevariations)
-                      FROM STDIN |]
+    getTables _ = [
+          TableInfo "artist" ["id", "name", "realname",
+                              "data_quality", "profile",
+                              "urls", "aliases", "groups",
+                              "members", "namevariations"]
+        ]
 
 instance Buildable Artist where
     build = parseArtists . fst
@@ -55,7 +59,7 @@ parseArtists (Element "artists" [] childs) = map parseArtist $ filter isElement 
 parseArtists _ = error "Couldn't find 'artists' tag."
 
 parseArtist :: UNode ByteString -> Artist
-parseArtist (Element "artist" [] childs) = foldr parseArtist' emptyArtist childs
+parseArtist (Element "artist" [] childs) = foldl' (flip parseArtist') emptyArtist childs
 parseArtist _ = error "Couldn't find 'artist' tag."
 
 parseArtist' :: UNode ByteString -> Artist -> Artist

@@ -3,3 +3,4 @@ module Discogs.Types
   ) where
 
 import Discogs.Artist as H
+import Discogs.Release as H
