@@ -44,9 +44,9 @@ instance Table Label where
     avoid = const Nothing
 
     toRows (Label i n c p f q us ss) = [
-        escapeRow [escape i, escape n, escape c,
-                   escape p, escape f, escape q,
-                   escapeList us, escapeList ss]
+          escapeRow [escape i, escape n, escape c,
+                     escape p, escape f, escape q,
+                     escapeList us, escapeList ss]
         ]
 
 instance Buildable Label where

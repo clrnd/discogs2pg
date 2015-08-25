@@ -120,46 +120,19 @@ CREATE TABLE master (
     id integer NOT NULL,
     title text,
     main_release integer NOT NULL,
-    year int,
+    year integer,
     notes text,
-    genres text,
-    styles text,
-    role text,
+    genres text[],
+    styles text[],
     data_quality text
  );
 
 CREATE TABLE masters_artists (
-    artist_name text,
-    master_id integer
-);
-
-CREATE TABLE masters_artists_joins (
-    artist1 text,
-    artist2 text,
+    master_id integer,
+    artist_id integer,
+    anv text,
     join_relation text,
-    master_id integer
-);
-
-CREATE TABLE masters_extraartists (
-    master_id integer,
-    artist_name text,
-    roles text[]
-);
-
-CREATE TABLE masters_formats (
-    master_id integer,
-    format_name text,
-    qty integer,
-    descriptions text[]
-);
-
-
-CREATE TABLE masters_images (
-    master_id integer,
-    type text,
-    height integer,
-    width integer,
-    image_uri text
+    role text
 );
 
 REVOKE ALL ON SCHEMA public FROM PUBLIC;

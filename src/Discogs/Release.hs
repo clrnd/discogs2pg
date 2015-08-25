@@ -13,6 +13,7 @@ import Data.Foldable (foldMap)
 import Text.XML.Expat.Tree (NodeG(..), UNode, isElement)
 import Data.ByteString (ByteString)
 
+import Discogs.ArtistRelation
 import Discogs.Build
 import Discogs.Store
 
@@ -26,8 +27,8 @@ data Release = Release
   , _releaseDate :: ByteString
   , _releaseQuality :: ByteString
   , _releaseNotes :: ByteString
-  , _releaseArtists :: [ReleaseArtist]
-  , _releaseExArtists :: [ReleaseArtist]
+  , _releaseArtists :: [ArtistRelation]
+  , _releaseExArtists :: [ArtistRelation]
   , _releaseLabels :: [ReleaseLabel]
   , _releaseFormats :: [ReleaseFormat]
   , _releaseTracks :: [ReleaseTrack]
@@ -36,13 +37,6 @@ data Release = Release
   , _releaseCompanies :: [ReleaseCompany]
   , _releaseGenres :: [ByteString]
   , _releaseStyles :: [ByteString] }
-  deriving Show
-
-data ReleaseArtist = ReleaseArtist
-  { _reArtId :: ByteString
-  , _reArtAnv :: ByteString
-  , _reArtJoin :: ByteString
-  , _reArtRole :: ByteString }
   deriving Show
 
 data ReleaseLabel = ReleaseLabel
@@ -61,8 +55,8 @@ data ReleaseTrack = ReleaseTrack
   { _reTrkTitle :: ByteString
   , _reTrkPosition :: ByteString
   , _reTrkDuration :: ByteString
-  , _reTrkArtists :: [ReleaseArtist]
-  , _reTrkExArtists :: [ReleaseArtist] }
+  , _reTrkArtists :: [ArtistRelation]
+  , _reTrkExArtists :: [ArtistRelation] }
   deriving Show
 
 data ReleaseIdentifier = ReleaseIdentifier
@@ -85,7 +79,6 @@ data ReleaseCompany = ReleaseCompany
   deriving Show
 
 $(makeLenses ''Release)
-$(makeLenses ''ReleaseArtist)
 $(makeLenses ''ReleaseLabel)
 $(makeLenses ''ReleaseFormat)
 $(makeLenses ''ReleaseTrack)
@@ -146,7 +139,7 @@ instance Table Release where
       where
         innerTable f = foldMap (escapeRow . f)
 
-        mkArtist (ReleaseArtist i' a' j' r') =
+        mkArtist (ArtistRelation i' a' j' r') =
             [escape i, escape i', escape a', escape j', escape r']
         mkLabel (ReleaseLabel l' c') =
             [escape i, escape l', escape c']
@@ -269,14 +262,3 @@ parseRelease' (Element "tracklist" [] ns) = releaseTracks .~ (map parseTrack $ f
     parseTrack' (Element "extraartists" [] ns'') = reTrkExArtists .~ (map parseArtist $ filter isElement ns'')
     parseTrack' _ = id
 parseRelease' _ = id
-
-parseArtist :: UNode ByteString -> ReleaseArtist
-parseArtist (Element "artist" [] childs) = foldl' (flip parseArtist') (ReleaseArtist "" "" "" "") childs
-parseArtist _ = undefined
-
-parseArtist' :: UNode ByteString -> ReleaseArtist -> ReleaseArtist
-parseArtist' (Element "id" [] txt) = reArtId .~ getTexts txt
-parseArtist' (Element "anv" [] txt) = reArtAnv .~ getTexts txt
-parseArtist' (Element "join" [] txt) = reArtJoin .~ getTexts txt
-parseArtist' (Element "role" [] txt) = reArtRole .~ getTexts txt
-parseArtist' _ = id

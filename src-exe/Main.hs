@@ -22,7 +22,7 @@ main = do
     --store "dbname='discogs2'" artists
     --mapM_ (putStrLn . ppShow) releases
 
-    let releases = labelStore $
+    let releases = masterStore $
                    build $
                    parseThrowing defaultParseOptions contents
 

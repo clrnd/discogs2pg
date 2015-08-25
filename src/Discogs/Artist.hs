@@ -48,9 +48,9 @@ instance Table Artist where
     avoid _ = Nothing
 
     toRows (Artist i n r d p us as gs ms ns) = [
-        escapeRow [escape i, escape n, escape r, escape d, escape p,
-                   escapeList us, escapeList as, escapeList gs,
-                   escapeList ms, escapeList ns]
+          escapeRow [escape i, escape n, escape r, escape d, escape p,
+                     escapeList us, escapeList as, escapeList gs,
+                     escapeList ms, escapeList ns]
         ]
 
 instance Buildable Artist where

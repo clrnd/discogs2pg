@@ -20,6 +20,8 @@ library
   other-modules:       Discogs.Artist
                      , Discogs.Release
                      , Discogs.Label
+                     , Discogs.Master
+                     , Discogs.ArtistRelation
   ghc-options:         -threaded -rtsopts -with-rtsopts=-N -Wall
   build-depends:       base
                      , bytestring
