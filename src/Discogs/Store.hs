@@ -1,8 +1,9 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Discogs.Store
- ( Storable(..)
- , Escapable(..)
+ ( Escapable(..)
  , TableInfo(..)
+ , Store(..)
+ , Table(..)
  , store
  , escapeRow
  ) where
@@ -25,17 +26,20 @@ data TableInfo = TableInfo
   { tableName :: String
   , tableColumns :: [String] }
 
-class Storable a where
-    getName :: [a] -> String
-    getTables :: [a] -> [TableInfo]
+data Store a = Store
+  { getStore :: [a]
+  , getName :: String
+  , getTables :: [TableInfo] }
+
+class Table a where
     toRows :: a -> [Builder]
     avoid :: a -> Maybe String
 
 
-store :: (Show a, Storable a) => String -> [a] -> IO ()
-store conf values = do
-    putStrLn $ "Parsing " ++ getName values ++ "..."
-    let tables = getTables values
+store :: (Show a, Table a) => String -> Store a -> IO ()
+store conf storable = do
+    putStrLn $ "Parsing " ++ getName storable ++ "..."
+    let tables = getTables storable
 
     conns <- forM tables $ \table -> do
         conn <- connectPostgreSQL $ pack conf
@@ -44,7 +48,7 @@ store conf values = do
         copy_ conn $ toQuery table
         return conn
 
-    forM_ values $ \val ->
+    forM_ (getStore storable) $ \val ->
         case avoid val of
             Just er -> do
                 putStr "Avoiding entry for "

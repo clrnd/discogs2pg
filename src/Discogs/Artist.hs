@@ -3,6 +3,7 @@
 {-# OPTIONS_GHC -fno-warn-missing-signatures #-}
 module Discogs.Artist
   ( Artist
+  , artistStore
   ) where
 
 import Lens.Simple
@@ -29,9 +30,20 @@ data Artist = Artist
 
 $(makeLenses ''Artist)
 
-instance Storable Artist where
-    getName _ = "artists"
 
+artistStore :: [Artist] -> Store Artist
+artistStore x = Store
+  { getStore=x
+  , getName="artists"
+  , getTables=[
+      TableInfo "artist" ["id", "name", "realname",
+                          "data_quality", "profile",
+                          "urls", "aliases", "groups",
+                          "members", "namevariations"]
+    ]
+  }
+
+instance Table Artist where
     avoid (Artist _ "" _ _ _ _ _ _ _ _) = Just "empty 'name'"
     avoid _ = Nothing
 
@@ -41,15 +53,8 @@ instance Storable Artist where
                    escapeList ms, escapeList ns]
         ]
 
-    getTables _ = [
-          TableInfo "artist" ["id", "name", "realname",
-                              "data_quality", "profile",
-                              "urls", "aliases", "groups",
-                              "members", "namevariations"]
-        ]
-
 instance Buildable Artist where
-    build = parseArtists . fst
+    build  = parseArtists
 
 emptyArtist :: Artist
 emptyArtist = Artist "" "" "" "" "" [] [] [] [] []

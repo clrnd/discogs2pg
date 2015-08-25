@@ -3,6 +3,7 @@
 {-# OPTIONS_GHC -fno-warn-missing-signatures #-}
 module Discogs.Release
   ( Release
+  , releaseStore
   ) where
 
 import Lens.Simple
@@ -92,9 +93,39 @@ $(makeLenses ''ReleaseIdentifier)
 $(makeLenses ''ReleaseVideo)
 $(makeLenses ''ReleaseCompany)
 
-instance Storable Release where
-    getName _ = "releases"
 
+releaseStore :: [Release] -> Store Release
+releaseStore x = Store
+  { getStore=x
+  , getName="releases"
+  , getTables = [
+      TableInfo "release" ["id", "master_id", "status",
+                           "title", "country", "released", "data_quality",
+                           "notes", "genres", "styles"]
+    , TableInfo "releases_artists" ["release_id", "artist_id",
+                                    "anv", "join_relation", "role"]
+    , TableInfo "releases_extraartists" ["release_id", "artist_id",
+                                         "anv", "join_relation", "role"]
+    , TableInfo "releases_labels" ["release_id", "label", "catno"]
+    , TableInfo "releases_formats" ["release_id", "format_name",
+                                    "format_text", "qty", "descriptions"]
+    , TableInfo "track" ["release_id", "title",
+                         "position", "duration"]
+    , TableInfo "tracks_artists" ["release_id", "artist_id",
+                                  "anv", "join_relation", "role"]
+    , TableInfo "tracks_extraartists" ["release_id", "artist_id",
+                                       "anv", "join_relation", "role"]
+    , TableInfo "releases_identifiers" ["release_id", "description",
+                                        "type", "value"]
+    , TableInfo "releases_videos" ["release_id", "duration",
+                                   "src", "title"]
+    , TableInfo "releases_companies" ["release_id", "company_id",
+                                      "catno", "entity_type",
+                                      "entity_type_name"]
+    ]
+  }
+
+instance Table Release where
     avoid = const Nothing
 
     toRows (Release i m s t c d q n as es ls fs ts is vs cs gs ss) = [
@@ -134,34 +165,9 @@ instance Storable Release where
         mkCompany (ReleaseCompany i' c' et' en') =
             [escape i, escape i', escape c', escape et', escape en']
 
-    getTables _ = [
-          TableInfo "release" ["id", "master_id", "status",
-                               "title", "country", "released", "data_quality",
-                               "notes", "genres", "styles"]
-        , TableInfo "releases_artists" ["release_id", "artist_id",
-                                        "anv", "join_relation", "role"]
-        , TableInfo "releases_extraartists" ["release_id", "artist_id",
-                                             "anv", "join_relation", "role"]
-        , TableInfo "releases_labels" ["release_id", "label", "catno"]
-        , TableInfo "releases_formats" ["release_id", "format_name",
-                                        "format_text", "qty", "descriptions"]
-        , TableInfo "track" ["release_id", "title",
-                             "position", "duration"]
-        , TableInfo "tracks_artists" ["release_id", "artist_id",
-                                      "anv", "join_relation", "role"]
-        , TableInfo "tracks_extraartists" ["release_id", "artist_id",
-                                           "anv", "join_relation", "role"]
-        , TableInfo "releases_identifiers" ["release_id", "description",
-                                            "type", "value"]
-        , TableInfo "releases_videos" ["release_id", "duration",
-                                       "src", "title"]
-        , TableInfo "releases_companies" ["release_id", "company_id",
-                                          "catno", "entity_type",
-                                          "entity_type_name"]
-        ]
 
 instance Buildable Release where
-    build = parseReleases . fst
+    build = parseReleases
 
 emptyRelease :: Release
 emptyRelease = Release

@@ -13,7 +13,7 @@ import Data.ByteString (ByteString)
 
 
 class Buildable a where
-    build :: (UNode ByteString, Maybe XMLParseError) -> [a]
+    build :: UNode ByteString -> [a]
 
 getNodes :: GenericXMLString a => a -> [UNode a] -> [a]
 getNodes tag = mapMaybe pickName
