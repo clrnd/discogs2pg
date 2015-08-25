@@ -80,7 +80,7 @@ CREATE TABLE releases_identifiers (
 
 CREATE TABLE releases_videos (
     release_id integer,
-    duration text,
+    duration integer,
     src text,
     title text
 );
