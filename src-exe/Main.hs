@@ -15,16 +15,16 @@ main = do
     [f] <- getArgs
     contents <- LB.readFile f
 
-    let artists = artistStore $
-                  build $
-                  parseThrowing defaultParseOptions contents
+    --let artists = artistStore $
+    --              build $
+    --              parseThrowing defaultParseOptions contents
 
-    store "dbname='discogs2'" artists
+    --store "dbname='discogs2'" artists
     --mapM_ (putStrLn . ppShow) releases
 
-    --let releases = releaseStore $
-    --               build $
-    --               parseThrowing defaultParseOptions contents
+    let releases = labelStore $
+                   build $
+                   parseThrowing defaultParseOptions contents
 
-    --store "dbname='discogs2'" releases
+    store "dbname='discogs2'" releases
     --mapM_ (putStrLn . ppShow) releases

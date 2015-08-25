@@ -4,3 +4,4 @@ module Discogs.Types
 
 import Discogs.Artist as H
 import Discogs.Release as H
+import Discogs.Label as H
