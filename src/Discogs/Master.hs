@@ -40,8 +40,8 @@ masterStore x = Store
       TableInfo "master" ["id", "title", "main_release",
                          "year", "notes", "data_quality",
                          "genres", "styles"]
-    , TableInfo "masters_artists" ["master_id", "artist_id",
-                                   "anv", "join_relation", "role"]
+    , TableInfo "master_artist" ["master_id", "artist_id",
+                                 "anv", "join_relation", "role"]
     ]
   }
 
