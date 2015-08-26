@@ -37,12 +37,12 @@ class Table a where
 
 
 store :: (Show a, Table a) => String -> Store a -> IO ()
-store conf storable = do
+store cns storable = do
     putStrLn $ "Parsing " ++ getName storable ++ "..."
     let tables = getTables storable
 
     conns <- forM tables $ \table -> do
-        conn <- connectPostgreSQL $ pack conf
+        conn <- connectPostgreSQL $ pack cns
         begin conn
         _ <- execute_ conn $ fromString ("TRUNCATE " <> tableName table)
         copy_ conn $ toQuery table
