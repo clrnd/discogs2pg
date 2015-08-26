@@ -30,7 +30,7 @@ and adding stack's binary path to your PATH.
 
 ### Usage
 
-For a default everything in Ubuntu you could, for example:
+For a default everything in Ubuntu you would, for example:
 
 ```
 $ createdb discogs
@@ -44,13 +44,14 @@ $ psql discogs < source_dir/sql/indexes.sql
 
 discogs2pg can has two forms of operation, by file and by date.
 
-You can import a single file like `discogs2pg -c ... some_releases.xml` or
-import releases, artists, labels and master for a date DATE with `discogs2pg -c ... -d DATE`.
-If you want it to be even faster, and your computer can handle it, you can pass an optional `--aggressive`
-to make it do all the imports in parallel.
+You can import a single file with `discogs2pg -c ... some_releases.xml` or
+import releases, artists, labels and master for a date DATE
+in the current directory with `discogs2pg -c ... -d DATE`.
 
-Consider that, since we are using COPY, it will open a conneciton per table, so it will
-open 15 connections to the DB at once.
+If you want it to be even faster, and your computer can handle it, you can pass an optional `--aggressive`
+to make it open all file in parallel.
+
+Consider that since we are using COPY it will open a connection per table: that's 15 connections at once.
 
 ## Contributing
 
