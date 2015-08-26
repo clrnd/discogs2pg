@@ -41,76 +41,78 @@ CREATE TABLE release (
     data_quality text
 );
 
-CREATE TABLE releases_artists (
-    release_id integer,
-    artist_id integer,
+CREATE TABLE release_artist (
+    release_id integer NOT NULL,
+    artist_id integer NOT NULL,
     anv text,
     join_relation text,
     role text
 );
 
-CREATE TABLE releases_extraartists (
-    release_id integer,
-    artist_id integer,
+CREATE TABLE release_extraartist (
+    release_id integer NOT NULL,
+    artist_id integer NOT NULL,
     anv text,
     join_relation text,
     role text
 );
 
-CREATE TABLE releases_formats (
-    release_id integer,
+CREATE TABLE release_format (
+    release_id integer NOT NULL,
     format_name text,
     format_text text,
     qty integer,
     descriptions text[]
 );
 
-CREATE TABLE releases_labels (
-    release_id integer,
+CREATE TABLE release_label (
+    release_id integer NOT NULL,
     label text,
     catno text
 );
 
-CREATE TABLE releases_identifiers (
-    release_id integer,
+CREATE TABLE release_identifier (
+    release_id integer NOT NULL,
     description text,
     type text,
     value text
 );
 
-CREATE TABLE releases_videos (
-    release_id integer,
+CREATE TABLE release_video (
+    release_id integer NOT NULL,
     duration integer,
     src text,
     title text
 );
 
-CREATE TABLE releases_companies (
-    release_id integer,
-    company_id integer,
-    entity_type integer,
+CREATE TABLE release_company (
+    release_id integer NOT NULL,
+    company_id integer NOT NULL,
+    entity_type integer NOT NULL,
     entity_type_name text,
     catno text
 );
 
 CREATE TABLE track (
-    release_id integer,
-    position text,
+    release_id integer NOT NULL,
+    position text NOT NULL,
     title text,
     duration text
 );
 
-CREATE TABLE tracks_artists (
-    release_id integer,
-    artist_id integer,
+CREATE TABLE track_artist (
+    track_position text NOT NULL,
+    release_id integer NOT NULL,
+    artist_id integer NOT NULL,
     anv text,
     join_relation text,
     role text
 );
 
-CREATE TABLE tracks_extraartists (
-    release_id integer,
-    artist_id integer,
+CREATE TABLE track_extraartist (
+    track_position text NOT NULL,
+    release_id integer NOT NULL,
+    artist_id integer NOT NULL,
     anv text,
     join_relation text,
     role text
@@ -127,9 +129,9 @@ CREATE TABLE master (
     data_quality text
  );
 
-CREATE TABLE masters_artists (
-    master_id integer,
-    artist_id integer,
+CREATE TABLE master_artist (
+    master_id integer NOT NULL,
+    artist_id integer NOT NULL,
     anv text,
     join_relation text,
     role text
