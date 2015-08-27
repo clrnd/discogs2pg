@@ -12,6 +12,7 @@ import Data.List (foldl')
 import Data.Foldable (foldMap)
 import Text.XML.Expat.Tree (NodeG(..), UNode, isElement)
 import Data.ByteString (ByteString)
+import Data.ByteString.Char8 (pack)
 
 import Discogs.ArtistRelation
 import Discogs.Build
@@ -52,7 +53,8 @@ data ReleaseFormat = ReleaseFormat
   deriving Show
 
 data ReleaseTrack = ReleaseTrack
-  { _reTrkTitle :: ByteString
+  { _reTrkIdx :: ByteString
+  , _reTrkTitle :: ByteString
   , _reTrkPosition :: ByteString
   , _reTrkDuration :: ByteString
   , _reTrkArtists :: [ArtistRelation]
@@ -102,12 +104,11 @@ releaseStore x = Store
     , TableInfo "release_label" ["release_id", "label", "catno"]
     , TableInfo "release_format" ["release_id", "format_name",
                                   "format_text", "qty", "descriptions"]
-    , TableInfo "track" ["release_id", "title",
-                         "position", "duration"]
-    , TableInfo "track_artist" ["track_position", "release_id",
+    , TableInfo "track" ["release_id", "idx", "title", "position", "duration"]
+    , TableInfo "track_artist" ["track_idx", "release_id",
                                 "artist_id", "anv",
                                 "join_relation", "role"]
-    , TableInfo "track_extraartist" ["track_position", "release_id",
+    , TableInfo "track_extraartist" ["track_idx", "release_id",
                                      "artist_id", "anv",
                                      "join_relation", "role"]
     , TableInfo "release_identifier" ["release_id", "description",
@@ -147,12 +148,12 @@ instance Table Release where
             [escape i, escape l', escape c']
         mkFormat (ReleaseFormat n' t' q' ds') =
             [escape i, escape n', escape t', escape q', escapeList ds']
-        mkTracks (ReleaseTrack t' p' d' _ _) =
-            [escape i, escape t', escape p', escape d']
-        mksTrackArtists (ReleaseTrack _ p' _ as' _) =
-            foldMap (escapeRow . (escape p' :) . mkArtist) as'
-        mksTrackExArtists (ReleaseTrack _ p' _ _ es') =
-            foldMap (escapeRow . (escape p' :) . mkArtist) es'
+        mkTracks (ReleaseTrack i' t' p' d' _ _) =
+            [escape i, escape i', escape t', escape p', escape d']
+        mksTrackArtists (ReleaseTrack i' _ _ _ as' _) =
+            foldMap (escapeRow . (escape i' :) . mkArtist) as'
+        mksTrackExArtists (ReleaseTrack i' _ _ _ _ es') =
+            foldMap (escapeRow . (escape i' :) . mkArtist) es'
         mkIdentifier (ReleaseIdentifier d' t' v') =
             [escape i, escape d', escape t', escape v']
         mkVideo (ReleaseVideo d' s' t') =
@@ -253,9 +254,10 @@ parseRelease' (Element "companies" [] ns) = releaseCompanies .~ (map parseCompan
     parseCompany' (Element "entity_type" [] txt) = reComEntityType .~ getTexts txt
     parseCompany' (Element "entity_type_name" [] txt) = reComEntityName .~ getTexts txt
     parseCompany' _ = id
-parseRelease' (Element "tracklist" [] ns) = releaseTracks .~ (map parseTrack $ filter isElement ns)
+parseRelease' (Element "tracklist" [] ns) = releaseTracks .~ (map parseTrack . zip ones . filter isElement $ ns)
   where
-    parseTrack (Element "track" [] ns') = foldl' (flip parseTrack') (ReleaseTrack "" "" "" [] []) ns'
+    ones = [1..] :: [Int]
+    parseTrack (idx, (Element "track" [] ns')) = foldl' (flip parseTrack') (ReleaseTrack (pack $ show idx) "" "" "" [] []) ns'
     parseTrack _ = undefined
     parseTrack' (Element "position" [] txt) = reTrkPosition .~ getTexts txt
     parseTrack' (Element "title" [] txt) = reTrkTitle .~ getTexts txt

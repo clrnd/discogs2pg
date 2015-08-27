@@ -95,13 +95,14 @@ CREATE TABLE release_company (
 
 CREATE TABLE track (
     release_id integer NOT NULL,
-    position text NOT NULL,
+    idx integer NOT NULL,
+    position text,
     title text,
     duration text
 );
 
 CREATE TABLE track_artist (
-    track_position text NOT NULL,
+    track_idx text NOT NULL,
     release_id integer NOT NULL,
     artist_id integer NOT NULL,
     anv text,
@@ -110,7 +111,7 @@ CREATE TABLE track_artist (
 );
 
 CREATE TABLE track_extraartist (
-    track_position text NOT NULL,
+    track_idx text NOT NULL,
     release_id integer NOT NULL,
     artist_id integer NOT NULL,
     anv text,

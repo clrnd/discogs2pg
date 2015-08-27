@@ -12,9 +12,9 @@ ALTER TABLE ONLY release_format ADD CONSTRAINT release_format_pkey PRIMARY KEY (
 --ALTER TABLE ONLY release_identifier ADD CONSTRAINT release_identifier_pkey PRIMARY KEY (release_id, ??);
 ALTER TABLE ONLY release_label ADD CONSTRAINT release_label_pkey PRIMARY KEY (release_id, catno);
 ALTER TABLE ONLY release_video ADD CONSTRAINT release_video_pkey PRIMARY KEY (release_id, src);
-ALTER TABLE ONLY track ADD CONSTRAINT track_pkey PRIMARY KEY (release_id, position);
-ALTER TABLE ONLY track_artist ADD CONSTRAINT track_artist_pkey PRIMARY KEY (track_position, release_id, artist_id);
-ALTER TABLE ONLY track_extraartist ADD CONSTRAINT track_extraartist_pkey PRIMARY KEY (track_position, release_id, artist_id);
+ALTER TABLE ONLY track ADD CONSTRAINT track_pkey PRIMARY KEY (release_id, idx);
+ALTER TABLE ONLY track_artist ADD CONSTRAINT track_artist_pkey PRIMARY KEY (track_idx, release_id, artist_id);
+ALTER TABLE ONLY track_extraartist ADD CONSTRAINT track_extraartist_pkey PRIMARY KEY (track_idx, release_id, artist_id);
 
 --ALTER TABLE ONLY release_artist ADD CONSTRAINT FOREIGN KEY (release_id) REFERENCES release(id);
 --ALTER TABLE ONLY release_company ADD CONSTRAINT FOREIGN KEY (release_id) REFERENCES release(id);
@@ -34,7 +34,6 @@ CREATE INDEX release_extraartist_id_idx ON release_extraartist (artist_id);
 CREATE INDEX release_extraartist_releaseid_idx ON release_extraartist (release_id);
 CREATE INDEX track_artist_id_idx ON track_artist (artist_id);
 CREATE INDEX track_extraartist_id_idx ON track_extraartist (artist_id);
-CREATE INDEX track_releaseid_idx ON track (release_id);
 CREATE INDEX release_label_name_idx ON release_label (label);
 CREATE INDEX release_label_catno_idx ON release_label (catno);
 CREATE INDEX label_name_idx ON label (name);
