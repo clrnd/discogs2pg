@@ -55,7 +55,9 @@ Consider that since we are using COPY it will open a connection per table: that'
 
 ## Contributing
 
-Not much to do for now, though I can think of two things:
+I don't have a Windows machine to build and test the binary, so I'd love it if someone could get into that.
+
+Also, I can think of two things:
 
 * someone with experience in DBs could improve the data structure and indexes/primary keys
 * someone with experience in structuring Haskell projects could help with the types/typeclasses and modules
