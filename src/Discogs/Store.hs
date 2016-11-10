@@ -72,6 +72,8 @@ toQuery (TableInfo n cs) = fromString $
     ") FROM STDIN"
 
 
+-- | Escape text data for use in a COPY FROM statement.
+--   Basically a ByteString Builder that replaces some chars.
 class Escapable b where
     escape :: b -> Builder
     escapeList :: [b] -> Builder

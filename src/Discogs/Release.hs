@@ -9,7 +9,6 @@ module Discogs.Release
 import Lens.Simple
 import Data.Maybe
 import Data.List (foldl')
-import Data.Foldable (foldMap)
 import Text.XML.Expat.Tree (NodeG(..), UNode, isElement)
 import Data.ByteString (ByteString)
 import Data.ByteString.Char8 (pack)

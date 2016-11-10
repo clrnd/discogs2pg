@@ -8,7 +8,6 @@ module Discogs.Master
 
 import Lens.Simple
 import Data.List (foldl')
-import Data.Foldable (foldMap)
 import Text.XML.Expat.Tree (NodeG(..), UNode, isElement)
 import Data.ByteString (ByteString)
 

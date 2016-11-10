@@ -5,7 +5,6 @@ module Discogs.Build
   , lookUpNode
   ) where
 
-import Data.Monoid
 import Data.List (find)
 import Data.Maybe
 import Text.XML.Expat.Tree
