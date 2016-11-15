@@ -121,7 +121,8 @@ releaseStore x = Store
   }
 
 instance Table Release where
-    avoid = const Nothing
+    avoid (Release "8262262" _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _) = Just "ridiculous relase - One Vigintillion(10^63)"
+    avoid _ = Nothing
 
     toRows (Release i m s t c d q n as es ls fs ts is vs cs gs ss) = [
           escapeRow [escape i, escape m, escape s, escape t,

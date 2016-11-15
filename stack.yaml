@@ -2,6 +2,6 @@ flags: {}
 packages:
 - '.'
 extra-deps:
-- lens-family-1.2.0
-- lens-simple-0.1.0.7
-resolver: lts-6.7
+- hexpat-0.20.9
+- List-0.5.2
+resolver: lts-7.8
