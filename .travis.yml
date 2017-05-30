@@ -1,10 +1,10 @@
 sudo: false
 
-language: haskell
+language: sh
 
 cache:
   directories:
-    - $HOME/.stack/
+  - "$HOME/.stack/"
 
 before_install:
 - mkdir -p ~/.local/bin
@@ -14,3 +14,11 @@ before_install:
 install:
 - stack --no-terminal --skip-ghc-check setup
 - stack build --no-terminal --skip-ghc-check --only-snapshot
+
+deploy:
+  provider: releases
+  api_key:
+    secure: zP+sHBbN360TgrWgdVwlTkttME851HvMdKoMCHAP18JFiBM4JGGE4bSAZMCZOphYzdp52oNjXWrwff/4mxLNNGptTtbpjbGcAu5zb/HCjOD2lz4PwL20BUHQzhQvT9LcKLdMtfJGU8o4T+LHxkh4wLjLth3oXk9eXxP1hTtb8JCl0Rj1sokIpF1EZnw2qH7mjKDXt3TJVzDslVvm20kDqNlJ5O6dYaSm2TR92CVzyI+e99HqGNOhmkhStaqyI9PjiPWkhtWblR8YLwzTn3n4GlaNFiwAKFpdt4xmNXH5SBtL9P1mYgyuoz2aA6o0eUzCbgKsbsz/jHdbmNVaI1Jaxg3DxupiTEhJHttbx+zigAwW75/iIYawj1DQd0rItEB66KFfGxZtH8ludNWJhbJ9/yKNJarJEqFwtC+2f9t2Jj80XJ5niO5Vw5sxhwOcFyWDg6TtHCP7U07020iNoa1eSpgXFEkr6FIshInF4E6GKqou8hqMrG3YPt6aMRJLsVEtSJgHC0FRHwC9ImOkiHQErXYN+KujhtI5uqjWBiFh/e8foPu+eFzQewx6yosnpZbd+4WAvVhXJ5GCrNGgpkKr0wT/wtLsvn7R2m/QThjBuswzCbDNQj4PzVK5P6zg4IrNtdfO4N5Ev91Ue8a9DThov0Q0tFHzxNxa+cp8SiUaUpg=
+  file: "$HOME/.local/bin/discogs2pg"
+  on:
+    repo: alvare/discogs2pg
