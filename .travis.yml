@@ -2,10 +2,7 @@ sudo: false
 
 language: haskell
 
-ghc: 7.8
-
-dist: trusty
-group: edge
+ghc: 7.10
 
 cache:
   directories:
