@@ -10,7 +10,7 @@ cache:
 addons:
   apt:
     packages:
-    - ghc-7.10.3
+    - ghc
 
 before_install:
 #- sudo apt-get install -y g++ gcc libc6-dev libffi-dev libgmp-dev make xz-utils zlib1g-dev git gnupg
