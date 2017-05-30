@@ -2,8 +2,6 @@ sudo: false
 
 language: haskell
 
-ghc: 7.10
-
 cache:
   directories:
     - $HOME/.stack/
@@ -14,5 +12,5 @@ before_install:
 - travis_retry curl -L https://www.stackage.org/stack/linux-x86_64 | tar xz --wildcards --strip-components=1 -C ~/.local/bin '*/stack'
 
 install:
-#- stack --no-terminal --skip-ghc-check setup
+- stack --no-terminal --skip-ghc-check setup
 - stack build --no-terminal --skip-ghc-check --only-snapshot
