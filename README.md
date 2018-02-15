@@ -1,16 +1,16 @@
 Discogs to PostgreSQL
 =====================
 
-Import [Discogs' data dumps](http://www.discogs.com/data/) into Postgre efficiently.
+Import [Discogs' data dumps](http://www.discogs.com/data/) into Postgres efficiently.
 
 Uses [Hexpat](http://hackage.haskell.org/package/hexpat) for parsing XML
-and Postgre's [COPY](http://www.postgresql.org/docs/9.4/static/sql-copy.html) to store the result.
+and Postgres' [COPY](http://www.postgresql.org/docs/9.4/static/sql-copy.html) to store the result.
 
 Inspired by [discogs-xml2db](https://github.com/philipmat/discogs-xml2db).
 
 ## Why?
 
-I wanted Discogs' data in a Postgre database and I had some issues with the existing solution:
+I wanted Discogs' data in a Postgres database and I had some issues with the existing solution:
 
 1. it was slow, I let it run for 5 hours and it didn't finish
 2. SAX events parsing for nested data is too difficult to maintain IMHO
@@ -26,16 +26,23 @@ The projects uses [stack](https://github.com/commercialhaskell/stack) so it shou
 stack install
 ```
 
-and adding stack's binary path to your PATH.
+and adding stack's binary path to your PATH (if you haven't already).
 
 ### Usage
 
-For a default everything in Ubuntu you would, for example:
+Supposing we downloaded the 20150810 dump:
+
+* discogs_20150810_artists.xml.gz
+* discogs_20150810_labels.xml.gz
+* discogs_20150810_masters.xml.gz
+* discogs_20150810_releases.xml.gz
+
+and we didn't decompress them, then we can do:
 
 ```
 $ createdb discogs
 $ psql discogs < source_dir/sql/tables.sql
-$ discogs2pg -d 20150807 -c dbname=discogs
+$ discogs2pg -g -d 20150810 -c dbname=discogs
 $ # wait an hour or two ...
 $ psql discogs < source_dir/sql/indexes.sql
 ```
@@ -44,14 +51,15 @@ $ psql discogs < source_dir/sql/indexes.sql
 
 discogs2pg can has two forms of operation, by file and by date.
 
-You can import a single file with `discogs2pg -c ... some_releases.xml` or
+You can import a single file with `discogs2pg -c <blah> some_releases.xml` or
 import releases, artists, labels and master for a date DATE
-in the current directory with `discogs2pg -c ... -d DATE`.
+in the current directory with `discogs2pg -c <blah> -d DATE`.
+
+Also the `-g | --gzip` option lets you import the compressed files directly.
 
 If you want it to be even faster, and your computer can handle it, you can pass an optional `--aggressive`
-to make it open all file in parallel.
-
-Consider that since we are using COPY it will open a connection per table: that's 15 connections at once.
+to make it open all file in parallel. Consider that since we are using COPY it will open a
+connection per table: that's 15 connections at once.
 
 ## Contributing
 
@@ -61,5 +69,6 @@ Also, I can think of two things:
 
 * someone with experience in DBs could improve the data structure and indexes/primary keys
 * someone with experience in structuring Haskell projects could help with the types/typeclasses and modules
+* the code uses lazy lists (for real), I'd like to refactor it with conduit or something
 
 I'd be glad to hear suggestions and take pull requests, of course.
