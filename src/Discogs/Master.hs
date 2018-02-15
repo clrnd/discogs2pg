@@ -65,7 +65,7 @@ emptyMaster :: Master
 emptyMaster = Master "" "" "" "" "" "" [] [] []
 
 parseMasters :: UNode ByteString -> [Master]
-parseMasters (Element "masters" [] childs) = map parseMaster $ filter isElement childs
+parseMasters (Element "masters" _ childs) = map parseMaster $ filter isElement childs
 parseMasters _ = error "Couldn't find 'masters' tag."
 
 parseMaster :: UNode ByteString -> Master
@@ -77,12 +77,12 @@ parseMaster (Element "master" attrs childs) = foldl' (flip parseMaster') newMast
 parseMaster _ = error "Couldn't find 'master' tag."
 
 parseMaster' :: UNode ByteString -> Master -> Master
-parseMaster' (Element "title" [] txt) = masterTitle .~ getTexts txt
-parseMaster' (Element "main_release" [] txt) = masterMain .~ getTexts txt
-parseMaster' (Element "year" [] txt) = masterYear .~ getTexts txt
-parseMaster' (Element "notes" [] txt) = masterNotes .~ getTexts txt
-parseMaster' (Element "data_quality" [] txt) = masterQuality .~ getTexts txt
-parseMaster' (Element "genres" [] ns) = masterGenres .~ getNodes "genre" ns
-parseMaster' (Element "styles" [] ns) = masterStyles .~ getNodes "style" ns
-parseMaster' (Element "artists" [] ns) = masterArtists .~ (map parseArtist $ filter isElement ns)
+parseMaster' (Element "title" _ txt) = masterTitle .~ getTexts txt
+parseMaster' (Element "main_release" _ txt) = masterMain .~ getTexts txt
+parseMaster' (Element "year" _ txt) = masterYear .~ getTexts txt
+parseMaster' (Element "notes" _ txt) = masterNotes .~ getTexts txt
+parseMaster' (Element "data_quality" _ txt) = masterQuality .~ getTexts txt
+parseMaster' (Element "genres" _ ns) = masterGenres .~ getNodes "genre" ns
+parseMaster' (Element "styles" _ ns) = masterStyles .~ getNodes "style" ns
+parseMaster' (Element "artists" _ ns) = masterArtists .~ (map parseArtist $ filter isElement ns)
 parseMaster' _ = id

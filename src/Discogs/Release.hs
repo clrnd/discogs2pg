@@ -187,7 +187,7 @@ emptyRelease = Release
   , _releaseStyles=[] }
 
 parseReleases :: UNode ByteString -> [Release]
-parseReleases (Element "releases" [] childs) = map parseRelease $ filter isElement childs
+parseReleases (Element "releases" _ childs) = map parseRelease $ filter isElement childs
 parseReleases _ = error "Couldn't find 'releases' tag."
 
 parseRelease :: UNode ByteString -> Release
@@ -200,24 +200,24 @@ parseRelease (Element "release" attrs childs) = foldl' (flip parseRelease') newR
 parseRelease _ = error "Couldn't find 'release' tag."
 
 parseRelease' :: UNode ByteString -> Release -> Release
-parseRelease' (Element "title" [] txt) = releaseTitle .~ getTexts txt
-parseRelease' (Element "master_id" [] txt) = releaseMasterId .~ getTexts txt
-parseRelease' (Element "country" [] txt) = releaseCountry .~ getTexts txt
-parseRelease' (Element "released" [] txt) = releaseDate .~ getTexts txt
-parseRelease' (Element "notes" [] txt) = releaseNotes .~ getTexts txt
-parseRelease' (Element "data_quality" [] txt) = releaseQuality .~ getTexts txt
-parseRelease' (Element "genres" [] ns) = releaseGenres .~ getNodes "genre" ns
-parseRelease' (Element "styles" [] ns) = releaseStyles .~ getNodes "style" ns
-parseRelease' (Element "artists" [] ns) = releaseArtists .~ (map parseArtist $ filter isElement ns)
-parseRelease' (Element "extraartists" [] ns) = releaseExArtists .~ (map parseArtist $ filter isElement ns)
-parseRelease' (Element "labels" [] ns) = releaseLabels .~ (map parseLabel $ filter isElement ns)
+parseRelease' (Element "title" _ txt) = releaseTitle .~ getTexts txt
+parseRelease' (Element "master_id" _ txt) = releaseMasterId .~ getTexts txt
+parseRelease' (Element "country" _ txt) = releaseCountry .~ getTexts txt
+parseRelease' (Element "released" _ txt) = releaseDate .~ getTexts txt
+parseRelease' (Element "notes" _ txt) = releaseNotes .~ getTexts txt
+parseRelease' (Element "data_quality" _ txt) = releaseQuality .~ getTexts txt
+parseRelease' (Element "genres" _ ns) = releaseGenres .~ getNodes "genre" ns
+parseRelease' (Element "styles" _ ns) = releaseStyles .~ getNodes "style" ns
+parseRelease' (Element "artists" _ ns) = releaseArtists .~ (map parseArtist $ filter isElement ns)
+parseRelease' (Element "extraartists" _ ns) = releaseExArtists .~ (map parseArtist $ filter isElement ns)
+parseRelease' (Element "labels" _ ns) = releaseLabels .~ (map parseLabel $ filter isElement ns)
   where
     parseLabel (Element "label" attrs _) = foldl' (flip getAttrs) (ReleaseLabel "" "") attrs
     parseLabel _ = undefined
     getAttrs ("catno", s) = reLabCatno .~ s
     getAttrs ("name", s) = reLabLabel .~ s
     getAttrs _ = id
-parseRelease' (Element "formats" [] ns) = releaseFormats .~ (map parseFormat $ filter isElement ns)
+parseRelease' (Element "formats" _ ns) = releaseFormats .~ (map parseFormat $ filter isElement ns)
   where
     parseFormat (Element "format" attrs ns') = foldl' (flip getAttrs) (ReleaseFormat "" "" "" []) attrs
                                              & reFmtDescriptions .~ getDescs ns'
@@ -227,7 +227,7 @@ parseRelease' (Element "formats" [] ns) = releaseFormats .~ (map parseFormat $ f
     getAttrs ("text", s) = reFmtText .~ s
     getAttrs _ = id
     getDescs = concatMap (\(Element _ _ ns'') -> getNodes "description" ns'') . filter isElement
-parseRelease' (Element "identifiers" [] ns) = releaseIdentifiers .~ (map parseIdentifier $ filter isElement ns)
+parseRelease' (Element "identifiers" _ ns) = releaseIdentifiers .~ (map parseIdentifier $ filter isElement ns)
   where
     parseIdentifier (Element "identifier" attrs _) =
         foldl' (flip getAttrs) (ReleaseIdentifier "" "" "") attrs
@@ -236,7 +236,7 @@ parseRelease' (Element "identifiers" [] ns) = releaseIdentifiers .~ (map parseId
     getAttrs ("type", s) = reIdtType .~ s
     getAttrs ("value", s) = reIdtValue .~ s
     getAttrs _ = id
-parseRelease' (Element "videos" [] ns) = releaseVideos .~ (map parseVideo $ filter isElement ns)
+parseRelease' (Element "videos" _ ns) = releaseVideos .~ (map parseVideo $ filter isElement ns)
   where
     parseVideo (Element "video" attrs ns') =
         foldl' (flip getAttrs) (ReleaseVideo "" "" "") attrs
@@ -245,24 +245,24 @@ parseRelease' (Element "videos" [] ns) = releaseVideos .~ (map parseVideo $ filt
     getAttrs ("duration", s) = reVidDuration .~ s
     getAttrs ("src", s) = reVidSrc .~ s
     getAttrs _ = id
-parseRelease' (Element "companies" [] ns) = releaseCompanies .~ (map parseCompany $ filter isElement ns)
+parseRelease' (Element "companies" _ ns) = releaseCompanies .~ (map parseCompany $ filter isElement ns)
   where
-    parseCompany (Element "company" [] ns') = foldl' (flip parseCompany') (ReleaseCompany "" "" "" "") ns'
+    parseCompany (Element "company" _ ns') = foldl' (flip parseCompany') (ReleaseCompany "" "" "" "") ns'
     parseCompany _ = undefined
-    parseCompany' (Element "id" [] txt) = reComId .~ getTexts txt
-    parseCompany' (Element "catno" [] txt) = reComCatno .~ getTexts txt
-    parseCompany' (Element "entity_type" [] txt) = reComEntityType .~ getTexts txt
-    parseCompany' (Element "entity_type_name" [] txt) = reComEntityName .~ getTexts txt
+    parseCompany' (Element "id" _ txt) = reComId .~ getTexts txt
+    parseCompany' (Element "catno" _ txt) = reComCatno .~ getTexts txt
+    parseCompany' (Element "entity_type" _ txt) = reComEntityType .~ getTexts txt
+    parseCompany' (Element "entity_type_name" _ txt) = reComEntityName .~ getTexts txt
     parseCompany' _ = id
-parseRelease' (Element "tracklist" [] ns) = releaseTracks .~ (map parseTrack . zip ones . filter isElement $ ns)
+parseRelease' (Element "tracklist" _ ns) = releaseTracks .~ (map parseTrack . zip ones . filter isElement $ ns)
   where
     ones = [1..] :: [Int]
-    parseTrack (idx, (Element "track" [] ns')) = foldl' (flip parseTrack') (ReleaseTrack (pack $ show idx) "" "" "" [] []) ns'
+    parseTrack (idx, (Element "track" _ ns')) = foldl' (flip parseTrack') (ReleaseTrack (pack $ show idx) "" "" "" [] []) ns'
     parseTrack _ = undefined
-    parseTrack' (Element "position" [] txt) = reTrkPosition .~ getTexts txt
-    parseTrack' (Element "title" [] txt) = reTrkTitle .~ getTexts txt
-    parseTrack' (Element "duration" [] txt) = reTrkDuration .~ getTexts txt
-    parseTrack' (Element "artists" [] ns'') = reTrkArtists .~ (map parseArtist $ filter isElement ns'')
-    parseTrack' (Element "extraartists" [] ns'') = reTrkExArtists .~ (map parseArtist $ filter isElement ns'')
+    parseTrack' (Element "position" _ txt) = reTrkPosition .~ getTexts txt
+    parseTrack' (Element "title" _ txt) = reTrkTitle .~ getTexts txt
+    parseTrack' (Element "duration" _ txt) = reTrkDuration .~ getTexts txt
+    parseTrack' (Element "artists" _ ns'') = reTrkArtists .~ (map parseArtist $ filter isElement ns'')
+    parseTrack' (Element "extraartists" _ ns'') = reTrkExArtists .~ (map parseArtist $ filter isElement ns'')
     parseTrack' _ = id
 parseRelease' _ = id

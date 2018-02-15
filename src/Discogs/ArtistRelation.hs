@@ -25,12 +25,12 @@ $(makeLenses ''ArtistRelation)
 
 
 parseArtist :: UNode ByteString -> ArtistRelation
-parseArtist (Element "artist" [] childs) = foldl' (flip parseArtist') (ArtistRelation "" "" "" "") childs
+parseArtist (Element "artist" _ childs) = foldl' (flip parseArtist') (ArtistRelation "" "" "" "") childs
 parseArtist _ = undefined
 
 parseArtist' :: UNode ByteString -> ArtistRelation -> ArtistRelation
-parseArtist' (Element "id" [] txt) = artistRelId .~ getTexts txt
-parseArtist' (Element "anv" [] txt) = artistRelAnv .~ getTexts txt
-parseArtist' (Element "join" [] txt) = artistRelJoin .~ getTexts txt
-parseArtist' (Element "role" [] txt) = artistRelRole .~ getTexts txt
+parseArtist' (Element "id" _ txt) = artistRelId .~ getTexts txt
+parseArtist' (Element "anv" _ txt) = artistRelAnv .~ getTexts txt
+parseArtist' (Element "join" _ txt) = artistRelJoin .~ getTexts txt
+parseArtist' (Element "role" _ txt) = artistRelRole .~ getTexts txt
 parseArtist' _ = id

@@ -56,20 +56,20 @@ emptyLabel :: Label
 emptyLabel = Label "" "" "" "" "" "" [] []
 
 parseLabels :: UNode ByteString -> [Label]
-parseLabels (Element "labels" [] childs) = map parseLabel $ filter isElement childs
+parseLabels (Element "labels" _ childs) = map parseLabel $ filter isElement childs
 parseLabels _ = error "Couldn't find 'labels' tag."
 
 parseLabel :: UNode ByteString -> Label
-parseLabel (Element "label" [] childs) = foldl' (flip parseLabel') emptyLabel childs
+parseLabel (Element "label" _ childs) = foldl' (flip parseLabel') emptyLabel childs
 parseLabel _ = error "Couldn't find 'label' tag."
 
 parseLabel' :: UNode ByteString -> Label -> Label
-parseLabel' (Element "id" [] txt) = labelId .~ getTexts txt
-parseLabel' (Element "name" [] txt) = labelName .~ getTexts txt
-parseLabel' (Element "contactinfo" [] txt) = labelContactInfo .~ getTexts txt
-parseLabel' (Element "profile" [] txt) = labelProfile .~ getTexts txt
-parseLabel' (Element "parentLabel" [] txt) = labelParentLabel .~ getTexts txt
-parseLabel' (Element "data_quality" [] txt) = labelQuality .~ getTexts txt
-parseLabel' (Element "urls" [] ns) = labelUrls .~ getNodes "url" ns
-parseLabel' (Element "sublabels" [] ns) = labelSublabels .~ getNodes "label" ns
+parseLabel' (Element "id" _ txt) = labelId .~ getTexts txt
+parseLabel' (Element "name" _ txt) = labelName .~ getTexts txt
+parseLabel' (Element "contactinfo" _ txt) = labelContactInfo .~ getTexts txt
+parseLabel' (Element "profile" _ txt) = labelProfile .~ getTexts txt
+parseLabel' (Element "parentLabel" _ txt) = labelParentLabel .~ getTexts txt
+parseLabel' (Element "data_quality" _ txt) = labelQuality .~ getTexts txt
+parseLabel' (Element "urls" _ ns) = labelUrls .~ getNodes "url" ns
+parseLabel' (Element "sublabels" _ ns) = labelSublabels .~ getNodes "label" ns
 parseLabel' _ = id

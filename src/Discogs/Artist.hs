@@ -60,22 +60,22 @@ emptyArtist :: Artist
 emptyArtist = Artist "" "" "" "" "" [] [] [] [] []
 
 parseArtists :: UNode ByteString -> [Artist]
-parseArtists (Element "artists" [] childs) = map parseArtist $ filter isElement childs
+parseArtists (Element "artists" _ childs) = map parseArtist $ filter isElement childs
 parseArtists _ = error "Couldn't find 'artists' tag."
 
 parseArtist :: UNode ByteString -> Artist
-parseArtist (Element "artist" [] childs) = foldl' (flip parseArtist') emptyArtist childs
+parseArtist (Element "artist" _ childs) = foldl' (flip parseArtist') emptyArtist childs
 parseArtist _ = error "Couldn't find 'artist' tag."
 
 parseArtist' :: UNode ByteString -> Artist -> Artist
-parseArtist' (Element "id" [] txt) = artistId .~ getTexts txt
-parseArtist' (Element "name" [] txt) = artistName .~ getTexts txt
-parseArtist' (Element "realname" [] txt) = artistRealName .~ getTexts txt
-parseArtist' (Element "profile" [] txt) = artistProfile .~ getTexts txt
-parseArtist' (Element "data_quality" [] txt) = artistQuality .~ getTexts txt
-parseArtist' (Element "namevariations" [] ns) = artistNameVars .~ getNodes "name" ns
-parseArtist' (Element "aliases" [] ns) = artistAliases .~ getNodes "name" ns
-parseArtist' (Element "members" [] ns) = artistMembers .~ getNodes "name" ns
-parseArtist' (Element "groups" [] ns) = artistGroups .~ getNodes "name" ns
-parseArtist' (Element "urls" [] ns) = artistUrls .~ getNodes "url" ns
+parseArtist' (Element "id" _ txt) = artistId .~ getTexts txt
+parseArtist' (Element "name" _ txt) = artistName .~ getTexts txt
+parseArtist' (Element "realname" _ txt) = artistRealName .~ getTexts txt
+parseArtist' (Element "profile" _ txt) = artistProfile .~ getTexts txt
+parseArtist' (Element "data_quality" _ txt) = artistQuality .~ getTexts txt
+parseArtist' (Element "namevariations" _ ns) = artistNameVars .~ getNodes "name" ns
+parseArtist' (Element "aliases" _ ns) = artistAliases .~ getNodes "name" ns
+parseArtist' (Element "members" _ ns) = artistMembers .~ getNodes "name" ns
+parseArtist' (Element "groups" _ ns) = artistGroups .~ getNodes "name" ns
+parseArtist' (Element "urls" _ ns) = artistUrls .~ getNodes "url" ns
 parseArtist' _ = id

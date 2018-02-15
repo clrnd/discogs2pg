@@ -17,7 +17,7 @@ class Buildable a where
 getNodes :: GenericXMLString a => a -> [UNode a] -> [a]
 getNodes tag = mapMaybe pickName
   where
-      pickName (Element tag' [] txt) = if tag' == tag
+      pickName (Element tag' _ txt) = if tag' == tag
                                            then Just $ getTexts txt
                                            else Nothing
       pickName _ = Nothing
