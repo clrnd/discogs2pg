@@ -4,13 +4,15 @@ module Options
   , FileOptions(..)
   ) where
 
+import Data.Monoid
 import Options.Applicative
 import Options.Applicative.Help hiding (fullDesc)
 
 
 data Options = Options
   { connString :: String
-  , fileOptions :: FileOptions }
+  , fileOptions :: FileOptions
+  , isGzip :: Bool }
   deriving Show
 
 data FileOptions =
@@ -35,10 +37,13 @@ optsParserInfo = info (helper <*> optsParser)
 
 optsParser :: Parser Options
 optsParser = Options <$> strOption (long "conn"
-                                   <> short 'c'
-                                   <> metavar "CONN"
-                                   <> help "PostgreSQL libpq connection string")
+                                 <> short 'c'
+                                 <> metavar "CONN"
+                                 <> help "PostgreSQL libpq connection string")
                      <*> fileOptsParser
+                     <*> switch (long "gzip"
+                              <> short 'g'
+                              <> help "Read compressed files.")
 
 fileOptsParser :: Parser FileOptions
 fileOptsParser =

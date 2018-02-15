@@ -1,6 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Main where
 
+import           Codec.Compression.GZip (decompress)
 import           Control.Concurrent
 import           Text.XML.Expat.Tree
 import qualified Data.ByteString.Lazy as LB
@@ -15,27 +16,30 @@ main :: IO ()
 main = do
     opts <- getOptions
 
-    let cns = connString opts
-
     case fileOptions opts of
-        Date d True -> importMany cns d True
-        Date d False -> importMany cns d False
-        Filename f -> importOne cns f
+        Date d True -> importMany opts d True
+        Date d False -> importMany opts d False
+        Filename f -> importOne opts f
 
-importMany :: String -> Int -> Bool -> IO ()
-importMany cns d agr = do
-    let actions = map process [ ("labels", run labelStore)
-                              , ("masters", run masterStore)
-                              , ("artists", run artistStore)
-                              , ("releases", run releaseStore) ]
+importMany :: Options -> Int -> Bool -> IO ()
+importMany opts d agr = do
+    let read_f = case (isGzip opts) of
+                     True -> fmap decompress . LB.readFile
+                     False -> LB.readFile
+
+    let actions = map (process read_f) [ ("labels", run labelStore)
+                                       , ("masters", run masterStore)
+                                       , ("artists", run artistStore)
+                                       , ("releases", run releaseStore) ]
     case agr of
         True -> mapM forkChildren actions >>= mapM_ takeMVar
         False -> sequence_ actions
   where
-    process (n, (MkRunnable f)) = LB.readFile (format n) >>=
-                        store cns . f . build .
-                        parseThrowing defaultParseOptions
-    format s = "discogs_" ++ show d ++ "_" ++ s ++ ".xml"
+    process read_f (n, (MkRunnable f)) =
+            read_f (format n) >>=
+            store (connString opts) . f . build .  parseThrowing defaultParseOptions
+    format s = "discogs_" ++ show d ++ "_" ++ s ++ ".xml" ++
+               if isGzip opts then ".gz" else ""
 
     forkChildren act = do
         mvar <- newEmptyMVar
@@ -45,9 +49,11 @@ importMany cns d agr = do
     handleExc (Left err) = print err
     handleExc _ = return ()
 
-importOne :: String -> String -> IO ()
-importOne cns file = do
-    contents <- LB.readFile file
+importOne :: Options -> String -> IO ()
+importOne opts filename = do
+    contents <- case (isGzip opts) of
+        True -> fmap decompress (LB.readFile filename)
+        False -> LB.readFile filename
 
     let xml = parseThrowing defaultParseOptions contents
 
@@ -59,4 +65,4 @@ importOne cns file = do
         _ -> error "Couldn't figure out contents of file."
 
   where
-    storeF f = store cns . f . build
+    storeF f = store (connString opts) . f . build

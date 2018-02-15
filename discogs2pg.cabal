@@ -40,4 +40,5 @@ executable discogs2pg
                      , hexpat
                      , optparse-applicative
                      , discogs2pg
+                     , zlib
   default-language:    Haskell2010
