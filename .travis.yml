@@ -22,7 +22,7 @@ install:
 - stack install --system-ghc --no-terminal
 
 script:
-- echo "Done!"
+- discogs2pg --help
 
 deploy:
   provider: releases
@@ -31,3 +31,4 @@ deploy:
   file: "$HOME/.local/bin/discogs2pg"
   on:
     repo: alvare/discogs2pg
+    tags: true

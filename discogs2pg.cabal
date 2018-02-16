@@ -1,5 +1,5 @@
 name:                discogs2pg
-version:             0.1.0.0
+version:             0.3
 synopsis:            Parse Discogs XML dumps into postgresql
 description:         Please see README.md
 homepage:            http://github.com/alvare/discogs2pg

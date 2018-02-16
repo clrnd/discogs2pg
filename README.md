@@ -1,6 +1,8 @@
 Discogs to PostgreSQL
 =====================
 
+[![Build Status](https://travis-ci.org/alvare/discogs2pg.svg?branch=master)](https://travis-ci.org/alvare/discogs2pg)
+
 Import [Discogs' data dumps](http://www.discogs.com/data/) into Postgres efficiently.
 
 Uses [Hexpat](http://hackage.haskell.org/package/hexpat) for parsing XML
@@ -37,14 +39,14 @@ Supposing we downloaded the 20150810 dump:
 * discogs_20150810_masters.xml.gz
 * discogs_20150810_releases.xml.gz
 
-and we didn't decompress them, then we can do:
+and we didn't decompress them, then we can run on the repo's directory:
 
 ```
 $ createdb discogs
-$ psql discogs < source_dir/sql/tables.sql
+$ psql discogs < sql/tables.sql
 $ discogs2pg -g -d 20150810 -c dbname=discogs
 $ # wait an hour or two ...
-$ psql discogs < source_dir/sql/indexes.sql
+$ psql discogs < sql/indexes.sql
 ```
 
 ### Options
