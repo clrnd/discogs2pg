@@ -61,7 +61,7 @@ CREATE TABLE release_format (
     release_id integer NOT NULL,
     format_name text,
     format_text text,
-    qty integer,
+    qty bigint,
     descriptions text[]
 );
 
